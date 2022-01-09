@@ -9,7 +9,6 @@
 
 
 
-
 unsigned long tiempo_lectura = 2000; // intervalo de lectura general (sin ejecutar funcion de registro de datos)
 unsigned long tiempo_sin_registro;
 
@@ -30,21 +29,31 @@ MAX6675 termopar3(thermoCLK, thermoCS3, thermoDO);
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
+ String hora = String(millis());
+ String nombre = "/" + hora + ".csv";
 
 
+ 
+ 
+  
 void setup(){
   Wire.begin(33, 32);
   Serial.begin(115200);
+
+  
+  Serial.println("nombre de archivo\n\n\n\n\n");
+  Serial.println(nombre);
+  delay(5000);
   
   checkOLED();
   display.display();
-  delay(2000); // Pause for 2 seconds
+  delay(2000); 
   
   checkSD();
-  
 
 
   
+  createFile(nombre);
   writeFile(SD, "/hello00.txt", "Hello ");
   appendFile(SD, "/hello00.txt", "Worldllllllllllllllllllllllllllllllllllllllllll!\n");
   readFile(SD, "/hello00.txt");
@@ -56,11 +65,16 @@ void setup(){
 
 void loop(){
   
+  
   if(millis() - tiempo_sin_registro >= tiempo_lectura){
      //hora = getTime();
      Serial.println(" Termopar 1 = " + String(termopar1.readCelsius()) + " C");
      Serial.println(" Termopar 2 = " + String(termopar2.readCelsius()) + " C");
-     Serial.println(" Termopar 2 = " + String(termopar3.readCelsius()) + " C");
+     Serial.println(" Termopar 3 = " + String(termopar3.readCelsius()) + " C");
+     String dataString = createString();
+     appendTempString(dataString, nombre);
+     
+     
      display.clearDisplay();
      display.setTextSize(1);             
      display.setTextColor(WHITE);        
@@ -86,47 +100,40 @@ void loop(){
      display.print(String(termopar3.readCelsius()) + " C");
      display.display();
      
-     
      tiempo_sin_registro = millis();  
     }
 }
 
 
 
-//String createString(){
-//  // crea el string para csv con las temperaturas
-//    String dataString = ""; 
-//    float lectura1 = termopar1.readCelsius();
-//    float lectura2 = termopar1.readCelsius() + 21;
-//    float lectura3 = termopar1.readCelsius() + 14;
-//    dataString += String(millis()) + ",";
-//    dataString += String(lectura1);
-//    dataString += ","; 
-//    dataString  += String(lectura2);
-//    dataString += ","; 
-//    dataString  += String(lectura3);
-//
-//  return dataString;
-//}
+String createString(){
+  // crea el string para csv con las temperaturas
+    String dataString = ""; 
+    float lectura1 = termopar1.readCelsius();
+    float lectura2 = termopar2.readCelsius();
+    float lectura3 = termopar3.readCelsius();
+    dataString += String(millis()) + ",";
+    dataString += String(lectura1);
+    dataString += ","; 
+    dataString += String(lectura2);
+    dataString += ","; 
+    dataString += String(lectura3) + "\n";
 
-// File createFile(String nombre){
-//  writeFile(SD, "/hello00.txt", "Hello ");
-//  //File dataFile = SD.open(nombre + ".csv", FILE_WRITE);
-//  String header = ("hora,termopar 1,termopar 2,termopar 3");
-//  if (dataFile) {
-//    dataFile.println(header);
-//    dataFile.close();
-//    // print to the serial port too:
-//    Serial.println(header);
-//    delay(5000);
-//  }
-//  // if the file isn't open, pop up an error:
-//  else {
-//    Serial.println("error creating datafile");
-//  }
-////  return dataFile;
-//}
+  return dataString;
+}
 
+
+String createFile(String nombre){
+  String header = ("hora,termopar 1,termopar 2,termopar 3\n");
+  String fileName;
+  fileName = "/" + nombre + ".csv";
+  writeFile(SD, fileName, header);
+  return fileName;
+}
+
+void appendTempString(String dataString, String fileName){
+  appendFile(SD, fileName, dataString);
+}
 
 void checkSD(){
     display.setTextSize(2);             
@@ -275,7 +282,7 @@ void readFile(fs::FS &fs, const char * path){
   file.close();
 }
 
-void writeFile(fs::FS &fs, const char * path, const char * message){
+void writeFile(fs::FS &fs, String path, String message){
   Serial.printf("Writing file: %s\n", path);
 
   File file = fs.open(path, FILE_WRITE);
@@ -291,7 +298,7 @@ void writeFile(fs::FS &fs, const char * path, const char * message){
   file.close();
 }
 
-void appendFile(fs::FS &fs, const char * path, const char * message){
+void appendFile(fs::FS &fs, String path, String message){
   Serial.printf("Appending to file: %s\n", path);
 
   File file = fs.open(path, FILE_APPEND);
