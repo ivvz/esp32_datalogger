@@ -1,2 +1,2 @@
-# esp3_datalogger
+# esp32 datalogger
 ESP32 based temperature data logger
