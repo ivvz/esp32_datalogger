@@ -1,7 +1,14 @@
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
+#include "max6675.h"
 
+
+int thermoDO = 17;
+int thermoCS = 16;
+int thermoCLK = 4;
+
+MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 
 
 void setup(){
@@ -9,22 +16,21 @@ void setup(){
 
   checkSD();
 
-
-
- 
-
   
   writeFile(SD, "/hello00.txt", "Hello ");
-  appendFile(SD, "/hello00.txt", "World!\n");
+  appendFile(SD, "/hello00.txt", "Worldllllllllllllllllllllllllllllllllllllllllll!\n");
   readFile(SD, "/hello00.txt");
-  deleteFile(SD, "/foo.txt");
   renameFile(SD, "/hello00.txt", "/f99.txt");
   readFile(SD, "/f99.txt");
-  testFileIO(SD, "/test.txt");
+  Serial.println("si jala mijo");
 
 }
 
 void loop(){
+   Serial.print("C = "); 
+   Serial.println(thermocouple.readCelsius()); 
+   // For the MAX6675 to update, you must delay AT LEAST 250ms between reads!
+   delay(1000);
 
 }
 
@@ -42,6 +48,34 @@ void checkSD(){
     return;
   }
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
