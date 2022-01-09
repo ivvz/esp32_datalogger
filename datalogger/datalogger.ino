@@ -14,11 +14,14 @@ unsigned long tiempo_lectura = 2000; // intervalo de lectura general (sin ejecut
 unsigned long tiempo_sin_registro;
 
 int thermoDO = 17;
-int thermoCS = 16;
 int thermoCLK = 4;
+int thermoCS1 = 16;
+int thermoCS2 = 15;
+int thermoCS3 = 13;
 
-MAX6675 termopar1(thermoCLK, thermoCS, thermoDO);
-
+MAX6675 termopar1(thermoCLK, thermoCS1, thermoDO);
+MAX6675 termopar2(thermoCLK, thermoCS2, thermoDO);
+MAX6675 termopar3(thermoCLK, thermoCS3, thermoDO);
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -56,7 +59,8 @@ void loop(){
   if(millis() - tiempo_sin_registro >= tiempo_lectura){
      //hora = getTime();
      Serial.println(" Termopar 1 = " + String(termopar1.readCelsius()) + " C");
-     //Serial.println(hora + " Termopar 2 = " + String(termopar2.readCelsius()) + " C");
+     Serial.println(" Termopar 2 = " + String(termopar2.readCelsius()) + " C");
+     Serial.println(" Termopar 2 = " + String(termopar3.readCelsius()) + " C");
      display.clearDisplay();
      display.setTextSize(1);             
      display.setTextColor(WHITE);        
@@ -71,7 +75,7 @@ void loop(){
      display.print("Tp 2");
      display.setTextSize(2);  
      display.setCursor(30,30);             
-     display.print(String(termopar1.readCelsius()+10) + " C");
+     display.print(String(termopar2.readCelsius()) + " C");
      display.display();
 
      display.setTextSize(1);
@@ -79,7 +83,7 @@ void loop(){
      display.print("Tp 3");
      display.setTextSize(2);  
      display.setCursor(30,50);             
-     display.print(String(termopar1.readCelsius()+16) + " C");
+     display.print(String(termopar3.readCelsius()) + " C");
      display.display();
      
      
@@ -89,39 +93,39 @@ void loop(){
 
 
 
-String createString(){
-  // crea el string para csv con las temperaturas
-    String dataString = ""; 
-    float lectura1 = termopar1.readCelsius();
-    float lectura2 = termopar1.readCelsius() + 21;
-    float lectura3 = termopar1.readCelsius() + 14;
-    dataString += String(millis()) + ",";
-    dataString += String(lectura1);
-    dataString += ","; 
-    dataString  += String(lectura2);
-    dataString += ","; 
-    dataString  += String(lectura3);
+//String createString(){
+//  // crea el string para csv con las temperaturas
+//    String dataString = ""; 
+//    float lectura1 = termopar1.readCelsius();
+//    float lectura2 = termopar1.readCelsius() + 21;
+//    float lectura3 = termopar1.readCelsius() + 14;
+//    dataString += String(millis()) + ",";
+//    dataString += String(lectura1);
+//    dataString += ","; 
+//    dataString  += String(lectura2);
+//    dataString += ","; 
+//    dataString  += String(lectura3);
+//
+//  return dataString;
+//}
 
-  return dataString;
-}
-
- File createFile(String nombre){
-  writeFile(SD, "/hello00.txt", "Hello ");
-  //File dataFile = SD.open(nombre + ".csv", FILE_WRITE);
-  String header = ("hora,termopar 1,termopar 2,termopar 3");
-  if (dataFile) {
-    dataFile.println(header);
-    dataFile.close();
-    // print to the serial port too:
-    Serial.println(header);
-    delay(5000);
-  }
-  // if the file isn't open, pop up an error:
-  else {
-    Serial.println("error creating datafile");
-  }
-  return dataFile;
-}
+// File createFile(String nombre){
+//  writeFile(SD, "/hello00.txt", "Hello ");
+//  //File dataFile = SD.open(nombre + ".csv", FILE_WRITE);
+//  String header = ("hora,termopar 1,termopar 2,termopar 3");
+//  if (dataFile) {
+//    dataFile.println(header);
+//    dataFile.close();
+//    // print to the serial port too:
+//    Serial.println(header);
+//    delay(5000);
+//  }
+//  // if the file isn't open, pop up an error:
+//  else {
+//    Serial.println("error creating datafile");
+//  }
+////  return dataFile;
+//}
 
 
 void checkSD(){
