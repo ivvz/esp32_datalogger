@@ -87,13 +87,14 @@ void loop(){
       display.print("ARCHIVO");
       display.display();
       delay(5000);
-      displayTermoparData();
+      
       
     while(estado_actual_boton_final == HIGH){
       if(millis() - tiempoEsperaLog >= tiempo_lectura){
       dataString = createString();
       Serial.println(dataString);
       appendTempString(dataString, nombre);
+      displayTermoparData();
       tiempoEsperaLog = millis();
       }
       estado_actual_boton_final = digitalRead(boton_cierre);
