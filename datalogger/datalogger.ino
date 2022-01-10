@@ -9,8 +9,13 @@
 
 
 
+int boton_inicio = 25;
+int boton_cierre = 26;
+int estado_anterior_boton_inicio;
+int estado_anterior_boton_final;
 unsigned long tiempo_lectura = 2000; // intervalo de lectura general (sin ejecutar funcion de registro de datos)
 unsigned long tiempo_sin_registro;
+unsigned long tiempoEsperaLog = 0;
 
 int thermoDO = 17;
 int thermoCLK = 4;
@@ -28,39 +33,24 @@ MAX6675 termopar3(thermoCLK, thermoCS3, thermoDO);
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
- String hora = String(millis());
- String nombre = "/" + hora + ".csv";
-
-
- 
- 
+  
   
 void setup(){
   Wire.begin(33, 32);
   Serial.begin(115200);
+  delay(2000);
 
-  
-  Serial.println("nombre de archivo\n\n\n\n\n");
-  Serial.println(nombre);
-  delay(5000);
+  //define los botones
+  pinMode(boton_inicio, INPUT_PULLUP);
+  pinMode(boton_cierre, INPUT_PULLUP);
+  digitalWrite(boton_inicio, HIGH);
+  digitalWrite(boton_inicio, HIGH);
+  estado_anterior_boton_inicio = digitalRead(boton_inicio);
+  estado_anterior_boton_final = digitalRead(boton_cierre);
   
   checkOLED();
-  display.display();
-  delay(2000); 
-  
   checkSD();
-
-
   
-  createFile(nombre);
-  writeFile(SD, "/hello00.txt", "Hello ");
-  appendFile(SD, "/hello00.txt", "Worldllllllllllllllllllllllllllllllllllllllllll!\n");
-  readFile(SD, "/hello00.txt");
-  renameFile(SD, "/hello00.txt", "/f99.txt");
-  readFile(SD, "/f99.txt");
-  Serial.println("si jala mijo");
-
 }
 
 void loop(){
@@ -71,44 +61,62 @@ void loop(){
      Serial.println(" Termopar 1 = " + String(termopar1.readCelsius()) + " C");
      Serial.println(" Termopar 2 = " + String(termopar2.readCelsius()) + " C");
      Serial.println(" Termopar 3 = " + String(termopar3.readCelsius()) + " C");
-     String dataString = createString();
-     appendTempString(dataString, nombre);
-     
-     
-     display.clearDisplay();
-     display.setTextSize(1);             
-     display.setTextColor(WHITE);        
-     display.setCursor(0,10);             
-     display.print("Tp 1");
-     display.setTextSize(2);  
-     display.setCursor(30,10);             
-     display.print(String(termopar1.readCelsius()) + " C");
+  
+     displayTermoparData();
 
-     display.setTextSize(1);
-     display.setCursor(0,30);             
-     display.print("Tp 2");
-     display.setTextSize(2);  
-     display.setCursor(30,30);             
-     display.print(String(termopar2.readCelsius()) + " C");
-     display.display();
-
-     display.setTextSize(1);
-     display.setCursor(0,50);             
-     display.print("Tp 3");
-     display.setTextSize(2);  
-     display.setCursor(30,50);             
-     display.print(String(termopar3.readCelsius()) + " C");
-     display.display();
-     
      tiempo_sin_registro = millis();  
     }
+
+  int estado_actual_boton_inicio = digitalRead(boton_inicio);
+  int estado_actual_boton_final = digitalRead(boton_cierre);
+
+  if (estado_actual_boton_inicio == LOW && estado_anterior_boton_inicio == HIGH ) {
+      String dataString;
+      String nombre;
+      nombre =  String(millis());
+      createFile(nombre); 
+      Serial.println("Escribiendo datos");
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setCursor(0,20);             
+      display.print("CREANDO");
+      display.setTextSize(2);  
+      display.setCursor(20,40);             
+      display.print("ARCHIVO");
+      display.display();
+      delay(5000);
+      displayTermoparData();
+
+      
+    while(estado_actual_boton_final == HIGH){
+      if(millis() - tiempoEsperaLog >= tiempo_lectura){
+      dataString = createString();
+      Serial.println(dataString);
+      tiempoEsperaLog = millis();
+      }
+      appendTempString(dataString, nombre);
+      estado_actual_boton_final = digitalRead(boton_cierre);
+      }
+  Serial.println("cerrando archivo....");
+  Serial.println("se cerro el archivo.......\nvolviendo a la lectura");
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setCursor(0,20);             
+      display.print("GUARDANDO");
+      display.setTextSize(2);  
+      display.setCursor(20,40);             
+      display.print("ARCHIVO");
+      display.display();
+      delay(5000);
+  }
+  
 }
 
 
 
 String createString(){
   // crea el string para csv con las temperaturas
-    String dataString = ""; 
+    String dataString = "";
     float lectura1 = termopar1.readCelsius();
     float lectura2 = termopar2.readCelsius();
     float lectura3 = termopar3.readCelsius();
@@ -179,6 +187,33 @@ void checkOLED(){
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
+}
+
+void displayTermoparData(){
+     display.clearDisplay();
+     display.setTextSize(1);             
+     display.setTextColor(WHITE);        
+     display.setCursor(0,10);             
+     display.print("Tp 1");
+     display.setTextSize(2);  
+     display.setCursor(30,10);             
+     display.print(String(termopar1.readCelsius()) + " C");
+
+     display.setTextSize(1);
+     display.setCursor(0,30);             
+     display.print("Tp 2");
+     display.setTextSize(2);  
+     display.setCursor(30,30);             
+     display.print(String(termopar2.readCelsius()) + " C");
+     display.display();
+
+     display.setTextSize(1);
+     display.setCursor(0,50);             
+     display.print("Tp 3");
+     display.setTextSize(2);  
+     display.setCursor(30,50);             
+     display.print(String(termopar3.readCelsius()) + " C");
+     display.display();
 }
 
 
