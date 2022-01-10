@@ -72,8 +72,10 @@ void loop(){
 
   if (estado_actual_boton_inicio == LOW && estado_anterior_boton_inicio == HIGH ) {
       String dataString;
-      String nombre;
-      nombre =  String(millis());
+      String nombre = "";
+      nombre += "/" + String(millis())+ ".csv";
+      Serial.println("Nombre del archivo: " + nombre);
+      delay(5000);
       createFile(nombre); 
       Serial.println("Escribiendo datos");
       display.clearDisplay();
@@ -86,19 +88,18 @@ void loop(){
       display.display();
       delay(5000);
       displayTermoparData();
-
       
     while(estado_actual_boton_final == HIGH){
       if(millis() - tiempoEsperaLog >= tiempo_lectura){
       dataString = createString();
       Serial.println(dataString);
+      appendTempString(dataString, nombre);
       tiempoEsperaLog = millis();
       }
-      appendTempString(dataString, nombre);
       estado_actual_boton_final = digitalRead(boton_cierre);
       }
-  Serial.println("cerrando archivo....");
-  Serial.println("se cerro el archivo.......\nvolviendo a la lectura");
+      Serial.println("cerrando archivo....");
+      Serial.println("se cerro el archivo.......\nvolviendo a la lectura");
       display.clearDisplay();
       display.setTextSize(2);
       display.setCursor(0,20);             
@@ -131,12 +132,9 @@ String createString(){
 }
 
 
-String createFile(String nombre){
+void createFile(String fileName){
   String header = ("hora,termopar 1,termopar 2,termopar 3\n");
-  String fileName;
-  fileName = "/" + nombre + ".csv";
   writeFile(SD, fileName, header);
-  return fileName;
 }
 
 void appendTempString(String dataString, String fileName){
@@ -144,6 +142,7 @@ void appendTempString(String dataString, String fileName){
 }
 
 void checkSD(){
+    display.clearDisplay();
     display.setTextSize(2);             
     display.setTextColor(WHITE);        
     display.setCursor(2,20);             
