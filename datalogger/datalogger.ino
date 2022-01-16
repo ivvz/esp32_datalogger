@@ -64,7 +64,7 @@ void loop(){
      Serial.println(" Termopar 1 = " + String(termopar1.readCelsius()) + " C");
      Serial.println(" Termopar 2 = " + String(termopar2.readCelsius()) + " C");
      Serial.println(" Termopar 3 = " + String(termopar3.readCelsius()) + " C");
-     displayTermoparData();
+     displayTermoparData(0);
      delay(5000);
      showHour();
      tiempo_sin_registro = millis();  
@@ -96,7 +96,7 @@ void loop(){
       dataString = createString();
       Serial.println(dataString);
       appendTempString(dataString, nombre);
-      displayTermoparData();
+      displayTermoparData(1);
       tiempoEsperaLog = millis();
       }
       estado_actual_boton_final = digitalRead(boton_cierre);
@@ -209,13 +209,19 @@ void checkClock(){
              //al momento de la compilacion. Comentar esta linea
 }
 
-void displayTermoparData(){
+void displayTermoparData(int isLogging){
      display.clearDisplay();
-     
+     if(isLogging == 0){
+     display.setTextSize(1);
+     display.setTextColor(WHITE);        
+     display.setCursor(12,0);            
+     display.print("ALMEXA INGENIERIA");
+      } else {
      display.setTextSize(1);
      display.setTextColor(WHITE);        
      display.setCursor(5,0);            
-     display.print("Registrando Datos");
+     display.print("Registrando Datos");   
+      }
      
      display.setTextSize(1);            
      display.setTextColor(WHITE);        
@@ -270,20 +276,15 @@ void showHour(){
   display.setTextColor(WHITE);        
   display.setCursor(12,0);            
   display.print("ALMEXA INGENIERIA");
-
   display.setTextSize(2);
   display.setCursor(22,20);
   display.print(String(fecha.hour()));
-  
   display.setCursor(42,20);
   display.print(":");
-
   display.setCursor(52,20);         
   display.print(String(fecha.minute()));
-  
   display.setCursor(73,20);
   display.print(":");    
-  
   display.setCursor(82,20);            
   display.print(String(fecha.second()));
 
@@ -297,14 +298,40 @@ void showHour(){
  display.print("/");       // caracter barra como separador
  display.setCursor(70,45); 
  display.print(fecha.year());      // funcion que obtiene el año de la fecha completa
-  
  display.display();
  delay(1000);
   
 }
 
 
+void errorCreatingFile(){
+    display.clearDisplay();
+    display.setTextSize(2);            
+    display.setTextColor(WHITE);        
+    display.setCursor(0,10);            
+    display.println("ERROR AL ");
+    display.setCursor(10,30);
+    display.println("CREAR");
+    display.setCursor(2,50);
+    display.println("ARCHIVO!");
+    display.display();
+    delay(2000);
+  
+}
 
+void errorAbrirArchivo(){
+    display.clearDisplay();
+    display.setTextSize(2);            
+    display.setTextColor(WHITE);        
+    display.setCursor(5,10);            
+    display.println("ERROR AL ");
+    display.setCursor(10,30);
+    display.println("ABRIR");
+    display.setCursor(2,50);
+    display.println("ARCHIVO!");
+    display.display();
+    delay(2000);
+}
 
 
 
@@ -389,15 +416,8 @@ void readFile(fs::FS &fs, const char * path){
   File file = fs.open(path);
   if(!file){
     Serial.println("Failed to open file for reading");
-    display.setTextSize(2);            
-    display.setTextColor(WHITE);        
-    display.setCursor(5,10);            
-    display.println("ERROR AL ");
-    display.setCursor(2,40);
-    display.println("ABRIR ARCHIVO!");
-    display.display();
-    delay(2000);
-    display.clearDisplay();
+    
+
     return;
   }
 
@@ -414,6 +434,7 @@ void writeFile(fs::FS &fs, String path, String message){
   File file = fs.open(path, FILE_WRITE);
   if(!file){
     Serial.println("Failed to open file for writing");
+    errorCreatingFile();
     return;
   }
   if(file.print(message)){
@@ -430,6 +451,7 @@ void appendFile(fs::FS &fs, String path, String message){
   File file = fs.open(path, FILE_APPEND);
   if(!file){
     Serial.println("Failed to open file for appending");
+    errorAbrirArchivo();
     return;
   }
   if(file.print(message)){
