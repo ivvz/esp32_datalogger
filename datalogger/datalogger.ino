@@ -59,13 +59,13 @@ void setup(){
 }
 
 void loop(){
- 
+  String hora;
  
   if(millis() - tiempo_sin_registro >= tiempo_lectura){
-     //hora = getTime();
-     Serial.println(" Termopar 1 = " + String(termopar1.readCelsius()) + " C");
-     Serial.println(" Termopar 2 = " + String(termopar2.readCelsius()) + " C");
-     Serial.println(" Termopar 3 = " + String(termopar3.readCelsius()) + " C");
+     hora = getTime();
+     Serial.println(hora + " Termopar 1 = " + String(termopar1.readCelsius()) + " C");
+     Serial.println(hora + " Termopar 2 = " + String(termopar2.readCelsius()) + " C");
+     Serial.println(hora + " Termopar 3 = " + String(termopar3.readCelsius()) + " C\n");
      displayTermoparData(0);
      delay(5000);
      showHour();
@@ -77,8 +77,9 @@ void loop(){
 
   if (estado_actual_boton_inicio == LOW && estado_anterior_boton_inicio == HIGH ) {
       String dataString;
-      String nombre = "";
-      nombre += "/" + String(millis())+ ".csv";
+      String hourFile = getNameDate();
+      String nombre;
+      nombre += "/" + hourFile + ".csv";
       Serial.println("Nombre del archivo: " + nombre);
       Serial.println("Escribiendo datos");
       display.clearDisplay();
@@ -99,6 +100,8 @@ void loop(){
       Serial.println(dataString);
       appendTempString(dataString, nombre);
       displayTermoparData(1);
+      delay(6000);
+      showHour();
       tiempoEsperaLog = millis();
       }
       estado_actual_boton_final = digitalRead(boton_cierre);
@@ -123,10 +126,11 @@ void loop(){
 String createString(){
   // crea el string para csv con las temperaturas
     String dataString = "";
+    String hora = getTime();
     float lectura1 = termopar1.readCelsius();
     float lectura2 = termopar2.readCelsius();
     float lectura3 = termopar3.readCelsius();
-    dataString += String(millis()) + ",";
+    dataString += hora + ",";
     dataString += String(lectura1);
     dataString += ",";
     dataString += String(lectura2);
@@ -318,7 +322,6 @@ void errorCreatingFile(){
     display.println("ARCHIVO!");
     display.display();
     delay(2000);
-  
 }
 
 void errorAbrirArchivo(){
@@ -335,11 +338,20 @@ void errorAbrirArchivo(){
     delay(2000);
 }
 
+String getTime(){
+  DateTime fecha = rtc.now();
+  String hora;
+  hora = String(fecha.hour()) + ":" + String(fecha.minute()) + ":" + String(fecha.second());
+  return hora;
+}
 
 
-
-
-
+String getNameDate(){
+  DateTime fecha = rtc.now();
+  String date;
+  date = String(fecha.day()) + "-" + String(fecha.month())+ "-" + String(fecha.hour()) + String(fecha.minute());
+  return date;
+}
 
 
 
