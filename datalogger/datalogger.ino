@@ -13,7 +13,7 @@ int boton_inicio = 25;
 int boton_cierre = 26;
 int estado_anterior_boton_inicio;
 int estado_anterior_boton_final;
-unsigned long tiempo_lectura = 2000; // intervalo de lectura general (sin ejecutar funcion de registro de datos)
+unsigned long tiempo_lectura = 10000; // intervalo de lectura general (sin ejecutar funcion de registro de datos)
 unsigned long tiempo_sin_registro;
 unsigned long tiempoEsperaLog = 0;
 
@@ -65,7 +65,8 @@ void loop(){
      Serial.println(" Termopar 2 = " + String(termopar2.readCelsius()) + " C");
      Serial.println(" Termopar 3 = " + String(termopar3.readCelsius()) + " C");
      displayTermoparData();
-     testWatch();
+     delay(5000);
+     showHour();
      tiempo_sin_registro = millis();  
     }
 
@@ -210,10 +211,10 @@ void checkClock(){
 
 void displayTermoparData(){
      display.clearDisplay();
-
+     
      display.setTextSize(1);
      display.setTextColor(WHITE);        
-     display.setCursor(2,0);            
+     display.setCursor(5,0);            
      display.print("Registrando Datos");
      
      display.setTextSize(1);            
@@ -261,6 +262,46 @@ void testWatch(){
  delay(1000);
   }
 
+void showHour(){
+  DateTime fecha = rtc.now();
+  display.clearDisplay();
+     
+  display.setTextSize(1);
+  display.setTextColor(WHITE);        
+  display.setCursor(12,0);            
+  display.print("ALMEXA INGENIERIA");
+
+  display.setTextSize(2);
+  display.setCursor(22,20);
+  display.print(String(fecha.hour()));
+  
+  display.setCursor(42,20);
+  display.print(":");
+
+  display.setCursor(52,20);         
+  display.print(String(fecha.minute()));
+  
+  display.setCursor(73,20);
+  display.print(":");    
+  
+  display.setCursor(82,20);            
+  display.print(String(fecha.second()));
+
+ display.setCursor(10,45); 
+ display.print(fecha.day());     // funcion que obtiene el dia de la fecha completa
+ display.setCursor(35,45); 
+ display.print("/");       // caracter barra como separador
+ display.setCursor(45,45); 
+ display.print(fecha.month());     // funcion que obtiene el mes de la fecha completa
+ display.setCursor(55,45); 
+ display.print("/");       // caracter barra como separador
+ display.setCursor(70,45); 
+ display.print(fecha.year());      // funcion que obtiene el año de la fecha completa
+  
+ display.display();
+ delay(1000);
+  
+}
 
 
 
