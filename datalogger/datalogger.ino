@@ -52,6 +52,8 @@ void setup(){
   
   checkOLED();
   checkClock();
+  rtc.adjust(DateTime(__DATE__, __TIME__));  // funcion que permite establecer fecha y horario
+             //al momento de la compilacion. Comentar esta linea
   checkSD();
  
 }
