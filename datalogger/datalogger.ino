@@ -78,7 +78,6 @@ void loop(){
       String nombre = "";
       nombre += "/" + String(millis())+ ".csv";
       Serial.println("Nombre del archivo: " + nombre);
-      createFile(nombre);
       Serial.println("Escribiendo datos");
       display.clearDisplay();
       display.setTextSize(2);
@@ -88,6 +87,7 @@ void loop(){
       display.setCursor(20,40);            
       display.print("ARCHIVO");
       display.display();
+      createFile(nombre);
       delay(5000);
      
      
