@@ -1,7 +1,7 @@
 #include "FS.h"
 #include "SD.h"
 #include "max6675.h"
-//#include <RTClib.h>
+#include <RTClib.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -22,6 +22,8 @@ int thermoCLK = 4;
 int thermoCS1 = 16;
 int thermoCS2 = 15;
 int thermoCS3 = 13;
+
+RTC_DS3231 rtc;     // crea objeto del tipo RTC_DS3231
 
 MAX6675 termopar1(thermoCLK, thermoCS1, thermoDO);
 MAX6675 termopar2(thermoCLK, thermoCS2, thermoDO);
@@ -47,8 +49,9 @@ void setup(){
   digitalWrite(boton_inicio, HIGH);
   estado_anterior_boton_inicio = digitalRead(boton_inicio);
   estado_anterior_boton_final = digitalRead(boton_cierre);
- 
+  
   checkOLED();
+  checkClock();
   checkSD();
  
 }
@@ -62,6 +65,7 @@ void loop(){
      Serial.println(" Termopar 2 = " + String(termopar2.readCelsius()) + " C");
      Serial.println(" Termopar 3 = " + String(termopar3.readCelsius()) + " C");
      displayTermoparData();
+     testWatch();
      tiempo_sin_registro = millis();  
     }
 
@@ -195,6 +199,15 @@ void checkOLED(){
   }
 }
 
+void checkClock(){
+ if (! rtc.begin()) {       // si falla la inicializacion del modulo
+ Serial.println("Modulo RTC no encontrado !");  // muestra mensaje de error
+ while (1);         // bucle infinito que detiene ejecucion del programa
+ }
+ rtc.adjust(DateTime(__DATE__, __TIME__));  // funcion que permite establecer fecha y horario
+             //al momento de la compilacion. Comentar esta linea
+}
+
 void displayTermoparData(){
      display.clearDisplay();
 
@@ -205,10 +218,10 @@ void displayTermoparData(){
      
      display.setTextSize(1);            
      display.setTextColor(WHITE);        
-     display.setCursor(0,12);            
+     display.setCursor(0,14);            
      display.print("Tp 1");
      display.setTextSize(2);  
-     display.setCursor(30,12);            
+     display.setCursor(30,14);            
      display.print(String(termopar1.readCelsius()) + " C");
 
      display.setTextSize(1);
@@ -230,7 +243,23 @@ void displayTermoparData(){
 
 
 
-
+void testWatch(){
+  DateTime fecha = rtc.now();      // funcion que devuelve fecha y horario en formato
+            // DateTime y asigna a variable fecha
+ Serial.print(fecha.day());     // funcion que obtiene el dia de la fecha completa
+ Serial.print("/");       // caracter barra como separador
+ Serial.print(fecha.month());     // funcion que obtiene el mes de la fecha completa
+ Serial.print("/");       // caracter barra como separador
+ Serial.print(fecha.year());      // funcion que obtiene el año de la fecha completa
+ Serial.print(" ");       // caracter espacio en blanco como separador
+ Serial.print(fecha.hour());      // funcion que obtiene la hora de la fecha completa
+ Serial.print(":");       // caracter dos puntos como separador
+ Serial.print(fecha.minute());      // funcion que obtiene los minutos de la fecha completa
+ Serial.print(":");       // caracter dos puntos como separador
+ Serial.println(fecha.second());    // funcion que obtiene los segundos de la fecha completa
+ 
+ delay(1000);
+  }
 
 
 
