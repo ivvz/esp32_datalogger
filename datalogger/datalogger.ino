@@ -1,7 +1,7 @@
 #include "FS.h"
 #include "SD.h"
 #include "max6675.h"
-#include <RTClib.h> 
+//#include <RTClib.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -33,8 +33,8 @@ MAX6675 termopar3(thermoCLK, thermoCS3, thermoDO);
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-  
-  
+ 
+ 
 void setup(){
   Wire.begin(33, 32);
   Serial.begin(115200);
@@ -47,23 +47,21 @@ void setup(){
   digitalWrite(boton_inicio, HIGH);
   estado_anterior_boton_inicio = digitalRead(boton_inicio);
   estado_anterior_boton_final = digitalRead(boton_cierre);
-  
+ 
   checkOLED();
   checkSD();
-  
+ 
 }
 
 void loop(){
-  
-  
+ 
+ 
   if(millis() - tiempo_sin_registro >= tiempo_lectura){
      //hora = getTime();
      Serial.println(" Termopar 1 = " + String(termopar1.readCelsius()) + " C");
      Serial.println(" Termopar 2 = " + String(termopar2.readCelsius()) + " C");
      Serial.println(" Termopar 3 = " + String(termopar3.readCelsius()) + " C");
-  
      displayTermoparData();
-
      tiempo_sin_registro = millis();  
     }
 
@@ -75,20 +73,19 @@ void loop(){
       String nombre = "";
       nombre += "/" + String(millis())+ ".csv";
       Serial.println("Nombre del archivo: " + nombre);
-      delay(5000);
-      createFile(nombre); 
+      createFile(nombre);
       Serial.println("Escribiendo datos");
       display.clearDisplay();
       display.setTextSize(2);
-      display.setCursor(0,20);             
+      display.setCursor(0,20);            
       display.print("CREANDO");
       display.setTextSize(2);  
-      display.setCursor(20,40);             
+      display.setCursor(20,40);            
       display.print("ARCHIVO");
       display.display();
       delay(5000);
-      
-      
+     
+     
     while(estado_actual_boton_final == HIGH){
       if(millis() - tiempoEsperaLog >= tiempo_lectura){
       dataString = createString();
@@ -103,15 +100,15 @@ void loop(){
       Serial.println("se cerro el archivo.......\nvolviendo a la lectura");
       display.clearDisplay();
       display.setTextSize(2);
-      display.setCursor(0,20);             
+      display.setCursor(0,20);            
       display.print("GUARDANDO");
       display.setTextSize(2);  
-      display.setCursor(20,40);             
+      display.setCursor(20,40);            
       display.print("ARCHIVO");
       display.display();
       delay(5000);
   }
-  
+ 
 }
 
 
@@ -124,9 +121,9 @@ String createString(){
     float lectura3 = termopar3.readCelsius();
     dataString += String(millis()) + ",";
     dataString += String(lectura1);
-    dataString += ","; 
+    dataString += ",";
     dataString += String(lectura2);
-    dataString += ","; 
+    dataString += ",";
     dataString += String(lectura3) + "\n";
 
   return dataString;
@@ -144,28 +141,28 @@ void appendTempString(String dataString, String fileName){
 
 void checkSD(){
     display.clearDisplay();
-    display.setTextSize(2);             
+    display.setTextSize(2);            
     display.setTextColor(WHITE);        
-    display.setCursor(2,20);             
-    display.println("REVISANDO MICRO SD!");
+    display.setCursor(2,20);            
+    display.println("REVISANDO  MICRO SD!");
     display.display();
     delay(2000);
     display.clearDisplay();
-    
+   
     if(!SD.begin(5)){
     Serial.println("Card Mount Failed");
-    display.setTextSize(2);             
+    display.setTextSize(2);            
     display.setTextColor(WHITE);        
-    display.setCursor(10,20);             
+    display.setCursor(10,20);            
     display.println(F("FALL0 SD!"));
     display.display();
-    delay(2000);
+    delay(10000);
     display.clearDisplay();
     return;
   }else{  
-    display.setTextSize(3);             
+    display.setTextSize(3);            
     display.setTextColor(WHITE);        
-    display.setCursor(40,10);             
+    display.setCursor(40,10);            
     display.println("SD");
     display.setCursor(40,40);
     display.println("OK!");
@@ -173,17 +170,26 @@ void checkSD(){
     delay(2000);
     display.clearDisplay();
   }
-  
+ 
   uint8_t cardType = SD.cardType();
 
   if(cardType == CARD_NONE){
-    Serial.println("No SE DETECTO UNA TARJETA");
+    Serial.println("NO SE DETECTO UNA TARJETA");
+    display.setTextSize(3);            
+    display.setTextColor(WHITE);        
+    display.setCursor(5,10);            
+    display.println("NO SE DETECTO");
+    display.setCursor(40,40);
+    display.println("SD!");
+    display.display();
+    delay(2000);
+    display.clearDisplay();
     return;
   }
   }
 
 void checkOLED(){
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
@@ -191,27 +197,33 @@ void checkOLED(){
 
 void displayTermoparData(){
      display.clearDisplay();
-     display.setTextSize(1);             
+
+     display.setTextSize(1);
      display.setTextColor(WHITE);        
-     display.setCursor(0,10);             
+     display.setCursor(2,0);            
+     display.print("Registrando Datos");
+     
+     display.setTextSize(1);            
+     display.setTextColor(WHITE);        
+     display.setCursor(0,12);            
      display.print("Tp 1");
      display.setTextSize(2);  
-     display.setCursor(30,10);             
+     display.setCursor(30,12);            
      display.print(String(termopar1.readCelsius()) + " C");
 
      display.setTextSize(1);
-     display.setCursor(0,30);             
+     display.setCursor(0,32);            
      display.print("Tp 2");
      display.setTextSize(2);  
-     display.setCursor(30,30);             
+     display.setCursor(30,32);            
      display.print(String(termopar2.readCelsius()) + " C");
      display.display();
 
      display.setTextSize(1);
-     display.setCursor(0,50);             
+     display.setCursor(0,50);            
      display.print("Tp 3");
      display.setTextSize(2);  
-     display.setCursor(30,50);             
+     display.setCursor(30,50);            
      display.print(String(termopar3.readCelsius()) + " C");
      display.display();
 }
@@ -307,6 +319,15 @@ void readFile(fs::FS &fs, const char * path){
   File file = fs.open(path);
   if(!file){
     Serial.println("Failed to open file for reading");
+    display.setTextSize(2);            
+    display.setTextColor(WHITE);        
+    display.setCursor(5,10);            
+    display.println("ERROR AL ");
+    display.setCursor(2,40);
+    display.println("ABRIR ARCHIVO!");
+    display.display();
+    delay(2000);
+    display.clearDisplay();
     return;
   }
 
