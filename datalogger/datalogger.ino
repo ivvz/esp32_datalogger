@@ -60,15 +60,23 @@ void setup(){
 
 void loop(){
   String hora;
- 
+  unsigned long displayTermoTime;
+  unsigned long displayHourTime;
   if(millis() - tiempo_sin_registro >= tiempo_lectura){
      hora = getTime();
      Serial.println(hora + " Termopar 1 = " + String(termopar1.readCelsius()) + " C");
      Serial.println(hora + " Termopar 2 = " + String(termopar2.readCelsius()) + " C");
      Serial.println(hora + " Termopar 3 = " + String(termopar3.readCelsius()) + " C\n");
+     
+
+     showHour(0);
+     delay(2000);
+
+     displayHourTime = millis();
+     if(millis() - displayHourTime <= 5000){
      displayTermoparData(0);
-     delay(5000);
-     showHour();
+     displayHourTime = millis();
+     }
      tiempo_sin_registro = millis();  
     }
 
@@ -95,13 +103,13 @@ void loop(){
      
      
     while(estado_actual_boton_final == HIGH){
+      
       if(millis() - tiempoEsperaLog >= tiempo_lectura){
       dataString = createString();
       Serial.println(dataString);
-      appendTempString(dataString, nombre);
+      showHour(1);
+      delay(2000);
       displayTermoparData(1);
-      delay(6000);
-      showHour();
       tiempoEsperaLog = millis();
       }
       estado_actual_boton_final = digitalRead(boton_cierre);
@@ -127,10 +135,13 @@ String createString(){
   // crea el string para csv con las temperaturas
     String dataString = "";
     String hora = getTime();
+    unsigned long tiempo = millis();
     float lectura1 = termopar1.readCelsius();
     float lectura2 = termopar2.readCelsius();
     float lectura3 = termopar3.readCelsius();
     dataString += hora + ",";
+    dataString += String(tiempo);
+    dataString += ",";
     dataString += String(lectura1);
     dataString += ",";
     dataString += String(lectura2);
@@ -142,7 +153,7 @@ String createString(){
 
 
 void createFile(String fileName){
-  String header = ("hora,termopar 1,termopar 2,termopar 3\n");
+  String header = ("hora,tiempo,termopar 1,termopar 2,termopar 3\n");
   writeFile(SD, fileName, header);
 }
 
@@ -211,7 +222,7 @@ void checkClock(){
  Serial.println("Modulo RTC no encontrado !");  // muestra mensaje de error
  while (1);         // bucle infinito que detiene ejecucion del programa
  }
- rtc.adjust(DateTime(__DATE__, __TIME__));  // funcion que permite establecer fecha y horario
+ //rtc.adjust(DateTime(__DATE__, __TIME__));  // funcion que permite establecer fecha y horario
              //al momento de la compilacion. Comentar esta linea
 }
 
@@ -274,24 +285,37 @@ void testWatch(){
  delay(1000);
   }
 
-void showHour(){
+void showHour(int isLogging){
+    display.clearDisplay();
+    if(isLogging == 0){
+    display.setTextSize(1);
+    display.setTextColor(WHITE);        
+    display.setCursor(12,0);            
+    display.print("ALMEXA INGENIERIA");
+    }else {
+    display.setTextSize(1);
+    display.setTextColor(WHITE);        
+    display.setCursor(15,10);            
+    display.print("Registrando Datos");
+    display.setCursor(12,0);            
+    display.print("ALMEXA INGENIERIA");   
+    }
+
+  
   DateTime fecha = rtc.now();
-  display.clearDisplay();
-     
-  display.setTextSize(1);
+  
+ 
   display.setTextColor(WHITE);        
-  display.setCursor(12,0);            
-  display.print("ALMEXA INGENIERIA");
   display.setTextSize(2);
-  display.setCursor(22,20);
+  display.setCursor(22,22);
   display.print(String(fecha.hour()));
-  display.setCursor(42,20);
+  display.setCursor(42,22);
   display.print(":");
-  display.setCursor(52,20);         
+  display.setCursor(52,22);         
   display.print(String(fecha.minute()));
-  display.setCursor(73,20);
+  display.setCursor(73,22);
   display.print(":");    
-  display.setCursor(82,20);            
+  display.setCursor(82,22);            
   display.print(String(fecha.second()));
 
  display.setCursor(10,45); 
