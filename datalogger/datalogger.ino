@@ -67,11 +67,8 @@ void loop(){
      Serial.println(hora + " Termopar 1 = " + String(termopar1.readCelsius()) + " C");
      Serial.println(hora + " Termopar 2 = " + String(termopar2.readCelsius()) + " C");
      Serial.println(hora + " Termopar 3 = " + String(termopar3.readCelsius()) + " C\n");
-     
-
      showHour(0);
      delay(2000);
-
      displayHourTime = millis();
      if(millis() - displayHourTime <= 5000){
      displayTermoparData(0);
@@ -103,9 +100,9 @@ void loop(){
      
      
     while(estado_actual_boton_final == HIGH){
-      
       if(millis() - tiempoEsperaLog >= tiempo_lectura){
       dataString = createString();
+      appendTempString(dataString,nombre);
       Serial.println(dataString);
       showHour(1);
       delay(2000);
@@ -222,8 +219,6 @@ void checkClock(){
  Serial.println("Modulo RTC no encontrado !");  // muestra mensaje de error
  while (1);         // bucle infinito que detiene ejecucion del programa
  }
- //rtc.adjust(DateTime(__DATE__, __TIME__));  // funcion que permite establecer fecha y horario
-             //al momento de la compilacion. Comentar esta linea
 }
 
 void displayTermoparData(int isLogging){
