@@ -40,4 +40,7 @@ ESP32 based type k thermocouple temperature data logger
 - CS2 --- Pin 15  
 - CS3 --- Pin 13  
 - VCC --- MT3608 VOUT Pin                                                 
-- GND --- GND 
+- GND --- GND
+
+#Schematics
+![schematics](/esp32_datalogger/datalogger_diagram.png) 
