@@ -42,5 +42,5 @@ ESP32 based type k thermocouple temperature data logger
 - VCC --- MT3608 VOUT Pin                                                 
 - GND --- GND
 
-#Schematics
-![schematics](datalogger_diagram.png) 
+# Schematics
+![schematics](datalogger_diagram.png =300x) 
