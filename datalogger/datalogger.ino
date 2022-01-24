@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <elapsedMillis.h>
 
 
 
@@ -62,20 +63,28 @@ void loop(){
   String hora;
   unsigned long displayTermoTime;
   unsigned long displayHourTime;
+  
+  elapsedMillis timeElapsed;
+  elapsedMillis termoTimeElapsed;
+ 
+  
+  unsigned int clockInterval = 3000; //intervalo para mostrar hora
+  unsigned int termoInterval = 5000; //intervalo para mostrar temperatura
+
   if(millis() - tiempo_sin_registro >= tiempo_lectura){
      hora = getTime();
      Serial.println(hora + " Termopar 1 = " + String(termopar1.readCelsius()) + " C");
      Serial.println(hora + " Termopar 2 = " + String(termopar2.readCelsius()) + " C");
      Serial.println(hora + " Termopar 3 = " + String(termopar3.readCelsius()) + " C\n");
-     showHour(0);
-     delay(2000);
-     displayHourTime = millis();
-     if(millis() - displayHourTime <= 5000){
-     displayTermoparData(0);
-     displayHourTime = millis();
+
+     while(timeElapsed < clockInterval){
+      showHour(0);
+      }
+      while(timeElapsed < termoInterval){
+        displayTermoparData(0);
      }
      tiempo_sin_registro = millis();  
-    }
+   }
 
   int estado_actual_boton_inicio = digitalRead(boton_inicio);
   int estado_actual_boton_final = digitalRead(boton_cierre);
@@ -104,9 +113,14 @@ void loop(){
       dataString = createString();
       appendTempString(dataString,nombre);
       Serial.println(dataString);
+      timeElapsed = 0;
+      while(timeElapsed < clockInterval){
       showHour(1);
-      delay(2000);
+      }
+      timeElapsed = 0;
+      while(timeElapsed < termoInterval){
       displayTermoparData(1);
+      }
       tiempoEsperaLog = millis();
       }
       estado_actual_boton_final = digitalRead(boton_cierre);
@@ -222,7 +236,14 @@ void checkClock(){
 }
 
 void displayTermoparData(int isLogging){
+  
+     float termo1 = termopar1.readCelsius();
+     float termo2 = termopar2.readCelsius();
+     float termo3 = termopar3.readCelsius();
+
+     
      display.clearDisplay();
+     
      if(isLogging == 0){
      display.setTextSize(1);
      display.setTextColor(WHITE);        
@@ -241,44 +262,26 @@ void displayTermoparData(int isLogging){
      display.print("Tp 1");
      display.setTextSize(2);  
      display.setCursor(30,14);            
-     display.print(String(termopar1.readCelsius()) + " C");
+     display.print(String(termo1) + " C");
 
      display.setTextSize(1);
      display.setCursor(0,32);            
      display.print("Tp 2");
      display.setTextSize(2);  
      display.setCursor(30,32);            
-     display.print(String(termopar2.readCelsius()) + " C");
-     display.display();
+     display.print(String(termo2) + " C");
 
      display.setTextSize(1);
      display.setCursor(0,50);            
      display.print("Tp 3");
      display.setTextSize(2);  
      display.setCursor(30,50);            
-     display.print(String(termopar3.readCelsius()) + " C");
+     display.print(String(termo3) + " C");
      display.display();
+     delay(900);
 }
 
 
-
-void testWatch(){
-  DateTime fecha = rtc.now();      // funcion que devuelve fecha y horario en formato
-            // DateTime y asigna a variable fecha
- Serial.print(fecha.day());     // funcion que obtiene el dia de la fecha completa
- Serial.print("/");       // caracter barra como separador
- Serial.print(fecha.month());     // funcion que obtiene el mes de la fecha completa
- Serial.print("/");       // caracter barra como separador
- Serial.print(fecha.year());      // funcion que obtiene el año de la fecha completa
- Serial.print(" ");       // caracter espacio en blanco como separador
- Serial.print(fecha.hour());      // funcion que obtiene la hora de la fecha completa
- Serial.print(":");       // caracter dos puntos como separador
- Serial.print(fecha.minute());      // funcion que obtiene los minutos de la fecha completa
- Serial.print(":");       // caracter dos puntos como separador
- Serial.println(fecha.second());    // funcion que obtiene los segundos de la fecha completa
- 
- delay(1000);
-  }
 
 void showHour(int isLogging){
     display.clearDisplay();
@@ -295,7 +298,6 @@ void showHour(int isLogging){
     display.setCursor(12,0);            
     display.print("ALMEXA INGENIERIA");   
     }
-
   
   DateTime fecha = rtc.now();
   
@@ -324,10 +326,8 @@ void showHour(int isLogging){
  display.setCursor(70,45); 
  display.print(fecha.year());      // funcion que obtiene el año de la fecha completa
  display.display();
- delay(1000);
-  
+ //delay(1000);
 }
-
 
 void errorCreatingFile(){
     display.clearDisplay();
