@@ -43,4 +43,4 @@ ESP32 based type k thermocouple temperature data logger
 - GND --- GND
 
 #Schematics
-![schematics](/esp32_datalogger/datalogger_diagram.png) 
+![schematics](datalogger_diagram.png) 
